@@ -24,6 +24,8 @@ az group deployment create `
                  'adminPassword=Adm1nP@s5w0rd!' `
                  "dnsNameForPublicIP=$dnsName"
 
+# alternative --template-file "docker-wordpress.json"
+
 # see what's in the group we just created
 az resource list -g $resourceGroup -o table
 
