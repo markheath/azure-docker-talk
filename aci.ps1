@@ -12,22 +12,24 @@ az group create -l $location -n $resourceGroup
 
 # STEP 2 - Linux container
 $dockerRepo = "markheath/miniblogcore:v1-linux" # https://hub.docker.com/r/markheath/miniblogcore/
-$containerName="miniblogcore"
-az container create --name $containerName --image $dockerRepo --resource-group $resourceGroup `
-                    --ip-address public --ports 80
+$containerName = "miniblogcore"
+$dnsName = "dockersoton1"
+az container create -n $containerName --image $dockerRepo -g $resourceGroup `
+                    --ip-address public --ports 80 --dns-name-label $dnsName
 
 # STEP 2 - ALTERNATIVE - Windows container (slower to start)
 $dockerRepo = "markheath/miniblogcore:v1"
 $containerName="miniblogcorewin"
-az container create --name $containerName --image $dockerRepo --resource-group $resourceGroup `
+az container create -n $containerName --image $dockerRepo -g $resourceGroup `
                     --ip-address public --ports 80 --os-type Windows
 
 # STEP 3 - check that its working
-$site = az container show --name $containerName --resource-group $resourceGroup --query "ipAddress.ip" -o tsv
-Start-Process http://$site
+#$site = az container show --name $containerName --resource-group $resourceGroup --query "ipAddress.ip" -o tsv
+#Start-Process http://$site
+Start-Process "http://$dnsName.$location.azurecontainer.io"
 
 # STEP 4 - examine the logs
-az container logs --name $containerName --resource-group $resourceGroup
+az container logs -n $containerName -g $resourceGroup
 
 # STEP 5 - clean up
-az group delete --name $resourceGroup --yes --no-wait
+az group delete -n $resourceGroup --yes --no-wait
