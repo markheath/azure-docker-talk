@@ -14,7 +14,14 @@
               "metadata": {
                   "description": "Name for the container group"
               }
-          }
+          },
+          "dnsNameLabel": {
+            "type": "string",
+            "defaultValue": "aciwordpress",
+            "metadata": {
+                "description": "DNS Name Label for the container group"
+            }
+        }
     },
     "variables": {
       "container1name": "front-end",
@@ -26,7 +33,7 @@
       {
         "name": "[parameters('containerGroupName')]",
         "type": "Microsoft.ContainerInstance/containerGroups",
-        "apiVersion": "2017-10-01-preview",
+        "apiVersion": "2018-02-01-preview",
         "location": "[resourceGroup().location]",
         "properties": {
           "containers": [
@@ -86,6 +93,7 @@
           "restartPolicy": "OnFailure",
           "ipAddress": {
             "type": "Public",
+            "dnsNameLabel": "[parameters('dnsNameLabel')]",
             "ports": [
               {
                 "protocol": "tcp",
