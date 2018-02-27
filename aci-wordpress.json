@@ -98,10 +98,6 @@
               {
                 "protocol": "tcp",
                 "port": "80"
-              },
-              {
-                "protocol": "tcp",
-                "port": "3306"
               }
             ]
           }
