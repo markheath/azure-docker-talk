@@ -1,4 +1,4 @@
-# http://markheath.net/post/four-ways-to-deploy-aspnet-core-website-in-azure
+# https://markheath.net/post/four-ways-to-deploy-aspnet-core-website-in-azure
 # https://docs.microsoft.com/en-us/cli/azure/container?view=azure-cli-latest
 # STEP 0 - login, make sure we have the correct subscription selected
 az login

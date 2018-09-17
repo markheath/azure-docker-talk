@@ -1,4 +1,4 @@
-# http://markheath.net/post/deploying-arm-templates-azure-cli
+# https://markheath.net/post/deploying-arm-templates-azure-cli
 az login
 az account show --query name -o tsv
 az account set -s "MVP"
