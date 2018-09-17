@@ -38,6 +38,10 @@ az mysql server firewall-rule create -g $resourceGroup `
     --server $mysqlServerName --name AllowAppService `
     --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
+# might not be necessary?
+$databaseName = "wordpress"
+az mysql db create -g $resourceGroup -s $mysqlServerName -n $databaseName
+
 # create a new webapp based on our DockerHub image
 $appName="appservicewp1"
 $dockerRepo = "wordpress" # https://hub.docker.com/r/_/wordpress/
@@ -49,8 +53,8 @@ $wordpressDbHost = (az mysql server show -g $resourceGroup -n $mysqlServerName -
 az webapp config appsettings set `
     -n $appName -g $resourceGroup --settings `
     WORDPRESS_DB_HOST=$wordpressDbHost `
-    WORDPRESS_DB_USER=$adminUser `
-    WORDPRESS_DB_PASSWORD=$adminPassword
+    WORDPRESS_DB_USER="$adminUser@$mysqlServerName" `
+    WORDPRESS_DB_PASSWORD="$adminPassword"
 
 # launch in a browser
 $site = az webapp show -n $appName -g $resourceGroup --query "defaultHostName" -o tsv
