@@ -1,4 +1,4 @@
-# http://markheath.net/post/four-ways-to-deploy-aspnet-core-website-in-azure
+# https://markheath.net/post/four-ways-to-deploy-aspnet-core-website-in-azure
 az login
 az account show --query name -o tsv
 az account set -s "MVP"
