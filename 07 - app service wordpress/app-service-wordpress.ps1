@@ -1,5 +1,4 @@
 # in this demo we run a wordpress site in linux container mode
-# WORK IN PROGRESS - currently fails to talk to mysql database
 
 # get logged in to the azure cli
 az login
@@ -28,9 +27,11 @@ $adminUser = "wpadmin"
 $adminPassword = Get-RandomString 20
 # supported mysql versions: https://docs.microsoft.com/en-us/azure/mysql/concepts-supported-versions
 # n.b. location is required for this command
+# this wordpress demo also requires SSL enforcement to be disabled
 az mysql server create -g $resourceGroup -n $mysqlServerName `
             --admin-user $adminUser --admin-password $adminPassword `
             -l $location `
+            --ssl-enforcement Disabled `
             --sku-name GP_Gen4_2 --version 5.7
 
 # open the firewall (use 0.0.0.0 to allow all Azure traffic for now)
@@ -38,12 +39,15 @@ az mysql server firewall-rule create -g $resourceGroup `
     --server $mysqlServerName --name AllowAppService `
     --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
-# might not be necessary?
-$databaseName = "wordpress"
-az mysql db create -g $resourceGroup -s $mysqlServerName -n $databaseName
+# to turn off ssl enforcement (if we didn't do it at creation time)
+# az mysql server update -g $resourceGroup -n $mysqlServerName --ssl-enforcement Disabled
+
+# Don't need to create the database - wordpress installer can do this automatically
+# $databaseName = "wordpress"
+# az mysql db create -g $resourceGroup -s $mysqlServerName -n $databaseName
 
 # create a new webapp based on our DockerHub image
-$appName="appservicewp1"
+$appName="wordpress-$((Get-RandomString 4).ToLower())"
 $dockerRepo = "wordpress" # https://hub.docker.com/r/_/wordpress/
 az webapp create -n $appName -g $resourceGroup --plan $planName -i $dockerRepo
 
@@ -59,6 +63,9 @@ az webapp config appsettings set `
 # launch in a browser
 $site = az webapp show -n $appName -g $resourceGroup --query "defaultHostName" -o tsv
 Start-Process https://$site
+
+# to apply the container settings afterwards (not sure if necessary)
+az webapp config container set -g $resourceGroup -n $appName -i $dockerRepo
 
 # scale up app service
 az appservice plan update -n $planName -g $resourceGroup --number-of-workers 3
