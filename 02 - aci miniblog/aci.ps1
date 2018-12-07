@@ -7,15 +7,16 @@ az account set -s "MVP"
 
 # STEP 1 - create a resource group
 $location = "westeurope"
-$resourceGroup = "miniblogaci"
+$resourceGroup = "ghostblogaci"
 az group create -l $location -n $resourceGroup
 
 # STEP 2 - Linux container
-$dockerRepo = "markheath/miniblogcore:v1-linux" # https://hub.docker.com/r/markheath/miniblogcore/
-$containerName = "miniblogcore"
-$dnsName = "dockersoton1"
+# $dockerRepo = "markheath/miniblogcore:v1-linux" # https://hub.docker.com/r/markheath/miniblogcore/
+$dockerRepo = "ghost" # https://hub.docker.com/r/markheath/miniblogcore/
+$containerName = "ghostblog"
+$dnsName = "azurethamesvalleyaci"
 az container create -n $containerName --image $dockerRepo -g $resourceGroup `
-                    --ip-address public --ports 80 --dns-name-label $dnsName
+                    --ip-address public --ports 2368 --dns-name-label $dnsName
 
 # STEP 2 - ALTERNATIVE - Windows container (slower to start)
 $dockerRepo = "markheath/miniblogcore:v1"
@@ -24,9 +25,11 @@ az container create -n $containerName --image $dockerRepo -g $resourceGroup `
                     --ip-address public --ports 80 --os-type Windows
 
 # STEP 3 - check that its working
-#$site = az container show --name $containerName --resource-group $resourceGroup --query "ipAddress.ip" -o tsv
+az container show -n $containerName -g $resourceGroup
+$site = az container show -n $containerName -g $resourceGroup --query "ipAddress.ip" -o tsv
 #Start-Process http://$site
-Start-Process "http://$dnsName.$location.azurecontainer.io"
+Start-Process "http://$dnsName.$location.azurecontainer.io:2368"
+Start-Process "http://$dnsName.$location.azurecontainer.io:2368/admin"
 
 # STEP 4 - examine the logs
 az container logs -n $containerName -g $resourceGroup
