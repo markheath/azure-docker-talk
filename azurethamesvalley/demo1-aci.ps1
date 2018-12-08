@@ -1,13 +1,10 @@
-# https://markheath.net/post/four-ways-to-deploy-aspnet-core-website-in-azure
-# https://docs.microsoft.com/en-us/cli/azure/container?view=azure-cli-latest
-# STEP 0 - login, make sure we have the correct subscription selected
 az login
 az account show --query name -o tsv
 az account set -s "MVP"
 
 # STEP 1 - create a resource group
 $location = "westeurope"
-$resourceGroup = "miniblogaci"
+$resourceGroup = "AzureThamesValleyAci"
 az group create -l $location -n $resourceGroup
 
 # STEP 2 - Linux container
@@ -24,10 +21,11 @@ az container create -n $containerName --image $dockerRepo -g $resourceGroup `
                     --ip-address public --ports 80 --os-type Windows
 
 # STEP 3 - check that its working
-az container show -n $containerName -g $resourceGroup
+az container show -g $resourceGroup -n $containerGroupName
+
 $site = az container show -n $containerName -g $resourceGroup --query "ipAddress.ip" -o tsv
-#Start-Process http://$site
-Start-Process "http://$dnsName.$location.azurecontainer.io"
+Start-Process http://$site
+# Start-Process "http://$dnsName.$location.azurecontainer.io"
 
 # STEP 4 - examine the logs
 az container logs -n $containerName -g $resourceGroup
