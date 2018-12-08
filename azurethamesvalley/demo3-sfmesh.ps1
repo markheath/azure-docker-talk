@@ -9,7 +9,7 @@ az extension update --name mesh
 
 # create a resource group
 $resGroup = "AzureThamesValleySFMesh"
-az group create -n $resGroup -l "eastus"
+az group create -n $resGroup -l "westeurope"
 
 # deploy the mesh application
 $templateFile = ".\sfmesh-example-voting-app.json"
