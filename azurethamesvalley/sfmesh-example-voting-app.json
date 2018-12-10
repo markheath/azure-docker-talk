@@ -110,7 +110,16 @@
         ],
         "tcp": [
           {
-            "name": "web",
+            "name": "tcpVote",
+            "port": 8080,
+            "destination": {
+              "applicationName": "votingApp",
+              "serviceName": "voteService",
+              "endpointName": "VoteListener"
+            }
+          },
+          {
+            "name": "tcpResult",
             "port": 8081,
             "destination": {
               "applicationName": "votingApp",

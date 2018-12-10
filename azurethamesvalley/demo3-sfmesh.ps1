@@ -18,7 +18,7 @@ az mesh deployment create -g $resGroup --template-file $templateFile
 # get status of application
 $appName = "votingApp"
 az mesh app show -g $resGroup -n $appName
-az mesh gateway show -n "ingressGateway" -g $resGroup
+az mesh gateway show -n "ingressGateway" -g $resGroup -o table
 az mesh network show -g $resGroup -n "votingNetwork"
 
 # get public ip address
@@ -48,13 +48,13 @@ az mesh deployment create -g $resGroup --template-file $templateFile `
 az mesh service list -g $resGroup --app-name $appName -o table
 
 # explore the vote service
-az mesh service show -g $resGroup --app-name $appName --name vote -o table
+az mesh service show -g $resGroup --app-name $appName -n "voteService" -o table
 
 # see the replicas
-az mesh service-replica list -g $resGroup --app-name $appName --service-name vote -o table
+az mesh service-replica list -g $resGroup --app-name $appName --service-name "voteService" -o table
 
 # explore a particular replica
-az mesh service-replica show -g $resGroup --app-name $appName --service-name vote --replica-name 0
+az mesh service-replica show -g $resGroup --app-name $appName --service-name "voteService" -n 0
 
 # delete everything
 az group delete -n $resGroup -y
