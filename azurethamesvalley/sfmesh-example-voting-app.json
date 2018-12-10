@@ -43,7 +43,7 @@
               "codePackages": [
                 {
                   "name": "vote",
-                  "image": "dockersamples/examplevotingapp_vote:dotnet-nanoserver",
+                  "image": "dockersamples/examplevotingapp_vote:dotnet-nanoserver-sac2016",
                   "endpoints": [
                     {
                       "name": "VoteListener",
@@ -84,7 +84,7 @@
               "codePackages": [
                 {
                   "name": "result",
-                  "image": "dockersamples/examplevotingapp_result:dotnet-nanoserver",
+                  "image": "dockersamples/examplevotingapp_result:dotnet-nanoserver-sac2016",
                   "endpoints": [
                     {
                       "name": "ResultListener",
@@ -125,7 +125,7 @@
               "codePackages": [
                 {
                   "name": "worker",
-                  "image": "dockersamples/examplevotingapp_worker:dotnet-nanoserver",
+                  "image": "dockersamples/examplevotingapp_worker:dotnet-nanoserver-sac2016",
                   "endpoints": [
 
                   ],

@@ -14,6 +14,11 @@ az group create -n $resGroup -l "westeurope"
 # deploy the mesh application
 $templateFile = ".\sfmesh-example-voting-app.json"
 az mesh deployment create -g $resGroup --template-file $templateFile
+
+# get status of application
+$appName = "votingApp"
+az mesh app show -g $resGroup --name $appName
+
 # [System.Console]::ResetColor()
 # get public ip address
 $networkName = "votingNetwork"
@@ -23,12 +28,9 @@ $publicIp = az mesh network show -g $resGroup --name $networkName --query "ingre
 Start-Process http://$($publicIp):8081 # voting
 Start-Process http://$($publicIp):8082 # results
 
-# get status of application
-$appName = "votingApp"
-az mesh app show -g $resGroup --name $appName
-
 # view logs for vote container
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name vote --replica-name 0 --code-package-name vote
+az mesh code-package-log get -g $resGroup --application-name $appName --service-name worker --replica-name 0 --code-package-name worker
 
 # see summary of services
 az mesh service list -g $resGroup --app-name $appName -o table
