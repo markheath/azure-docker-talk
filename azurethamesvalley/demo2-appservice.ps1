@@ -12,12 +12,14 @@ az group create -l $location -n $resourceGroup
 
 # create an app service plan to host
 $planName="linuxappservice"
-az appservice plan create -n $planName -g $resourceGroup -l $location --is-linux --sku S1
+az appservice plan create -n $planName -g $resourceGroup `
+            -l $location --is-linux --sku S1
 
 # create a new webapp based on our DockerHub image
 $appName="ghostatv"
 $dockerRepo = "ghost" # https://hub.docker.com/r/_/ghost/
-az webapp create -n $appName -g $resourceGroup --plan $planName -i $dockerRepo
+az webapp create -n $appName -g $resourceGroup --plan $planName `
+                -i $dockerRepo
 
 # configure settings (container environment vairables)
 az webapp config appsettings set `
