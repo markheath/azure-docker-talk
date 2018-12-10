@@ -66,7 +66,7 @@
                     "name":  "voteRoute",
                     "match": {
                       "path": {
-                        "value": "/vote",
+                        "value": "/",
                         "rewrite": "/",
                         "type": "Prefix"
                       }
@@ -76,12 +76,23 @@
                       "serviceName": "voteService",
                       "endpointName": "VoteListener"
                     }
-                  },
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "result",
+            "port": 8082,
+            "hosts": [
+              {
+                "name": "*",
+                "routes": [
                   {
                     "name": "resultRoute",
                     "match": {
                       "path": {
-                        "value": "/result",
+                        "value": "/",
                         "rewrite": "/",
                         "type": "Prefix"
                       }
@@ -95,6 +106,17 @@
                 ]
               }
             ]
+          }
+        ],
+        "tcp": [
+          {
+            "name": "web",
+            "port": 8081,
+            "destination": {
+              "applicationName": "votingApp",
+              "serviceName": "resultService",
+              "endpointName": "ResultListener"
+            }
           }
         ]
       }
