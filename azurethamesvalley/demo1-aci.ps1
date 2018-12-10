@@ -21,10 +21,10 @@ az container create -n $containerName --image $dockerRepo -g $resourceGroup `
                     --ip-address public --ports 80 --os-type Windows
 
 # STEP 3 - check that its working
-az container show -g $resourceGroup -n $containerGroupName
+az container show -g $resourceGroup -n $containerName
 
-$site = az container show -n $containerName -g $resourceGroup --query "ipAddress.ip" -o tsv
-Start-Process http://$site
+$domainName = az container show -n $containerName -g $resourceGroup --query "ipAddress.fqdn" -o tsv
+Start-Process http://$domainName
 # Start-Process "http://$dnsName.$location.azurecontainer.io"
 
 # STEP 4 - examine the logs
