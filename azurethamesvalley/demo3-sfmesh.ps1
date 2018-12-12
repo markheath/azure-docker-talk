@@ -31,7 +31,7 @@ Start-Process http://$($publicIp):8081/ # results - not working
 # view logs for containers
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name "voteService" --replica-name 0 --code-package-name "voteCode"
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name "resultService" --replica-name 0 --code-package-name "resultCode"
-az mesh code-package-log get -g $resGroup --application-name $appName --service-name "worker" --replica-name 0 --code-package-name "worker"
+az mesh code-package-log get -g $resGroup --application-name $appName --service-name "workerService" --replica-name 0 --code-package-name "worker"
 
 # see summary of services
 az mesh service list -g $resGroup --app-name $appName -o table

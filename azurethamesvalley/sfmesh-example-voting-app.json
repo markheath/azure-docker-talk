@@ -56,7 +56,7 @@
         },
         "http": [
           {
-            "name": "vote",
+            "name": "httpVote",
             "port": 80,
             "hosts": [
               {
@@ -74,7 +74,7 @@
                     "destination": {
                       "applicationName": "votingApp",
                       "serviceName": "voteService",
-                      "endpointName": "VoteListener"
+                      "endpointName": "voteListener"
                     }
                   }
                 ]
@@ -82,7 +82,7 @@
             ]
           },
           {
-            "name": "result",
+            "name": "httpResult",
             "port": 8082,
             "hosts": [
               {
@@ -100,7 +100,7 @@
                     "destination": {
                       "applicationName": "votingApp",
                       "serviceName": "resultService",
-                      "endpointName": "ResultListener"
+                      "endpointName": "resultListener"
                     }
                   }
                 ]
@@ -115,7 +115,7 @@
             "destination": {
               "applicationName": "votingApp",
               "serviceName": "voteService",
-              "endpointName": "VoteListener"
+              "endpointName": "voteListener"
             }
           },
           {
@@ -124,7 +124,7 @@
             "destination": {
               "applicationName": "votingApp",
               "serviceName": "resultService",
-              "endpointName": "ResultListener"
+              "endpointName": "resultListener"
             }
           }
         ]
@@ -149,10 +149,10 @@
               "codePackages": [
                 {
                   "name": "voteCode",
-                  "image": "dockersamples/examplevotingapp_vote:dotnet-nanoserver-sac2016",
+                  "image": "dockersamples/examplevotingapp_vote:dotnet-nanoserver",
                   "endpoints": [
                     {
-                      "name": "VoteListener",
+                      "name": "voteListener",
                       "port": 80
                     }
                   ],
@@ -180,7 +180,7 @@
                   "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
                   "endpointRefs": [
                     {
-                      "name": "VoteListener"
+                      "name": "voteListener"
                     }
                   ]
                 }
@@ -195,10 +195,10 @@
               "codePackages": [
                 {
                   "name": "resultCode",
-                  "image": "dockersamples/examplevotingapp_result:dotnet-nanoserver-sac2016",
+                  "image": "dockersamples/examplevotingapp_result:dotnet-nanoserver",
                   "endpoints": [
                     {
-                      "name": "ResultListener",
+                      "name": "resultListener",
                       "port": 20002
                     }
                   ],
@@ -226,7 +226,7 @@
                   "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
                   "endpointRefs": [
                     {
-                      "name": "ResultListener"
+                      "name": "resultListener"
                     }
                   ]
                 }
@@ -234,14 +234,14 @@
             }
           },
           {
-            "name": "worker",
+            "name": "workerService",
             "properties": {
               "description": "worker service.",
               "osType": "Windows",
               "codePackages": [
                 {
-                  "name": "worker",
-                  "image": "dockersamples/examplevotingapp_worker:dotnet-nanoserver-sac2016",
+                  "name": "workerCode",
+                  "image": "dockersamples/examplevotingapp_worker:dotnet-nanoserver",
                   "endpoints": [
 
                   ],
@@ -274,11 +274,11 @@
               "osType": "Windows",
               "codePackages": [
                 {
-                  "name": "message-queue",
+                  "name": "messageQueueCode",
                   "image": "registry.hub.docker.com/library/nats:nanoserver",
                   "endpoints": [
                     {
-                      "name": "MessageQueueListener",
+                      "name": "messageQueueListener",
                       "port": 4222
                     }
                   ],
@@ -299,7 +299,7 @@
                   "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
                   "endpointRefs": [
                     {
-                      "name": "MessageQueueListener"
+                      "name": "messageQueueListener"
                     }
                   ]
                 }
@@ -313,11 +313,11 @@
               "osType": "Windows",
               "codePackages": [
                 {
-                  "name": "tidb",
+                  "name": "tidbCode",
                   "image": "dockersamples/tidb:nanoserver",
                   "endpoints": [
                     {
-                      "name": "DbListener",
+                      "name": "dbListener",
                       "port": 4000
                     }
                   ],
@@ -338,7 +338,7 @@
                   "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
                   "endpointRefs": [
                     {
-                      "name": "DbListener"
+                      "name": "dbListener"
                     }
                   ]
                 }
