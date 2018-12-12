@@ -153,17 +153,21 @@
                   "endpoints": [
                     {
                       "name": "voteListener",
-                      "port": 80
+                      "port": 20001
                     }
                   ],
                   "environmentVariables": [
                     {
                       "name": "Voting__OptionA",
-                      "value": "Service Fabric"
+                      "value": "Star Wars"
                     },
                     {
                       "name": "Voting__OptionB",
-                      "value": "Kubernetes"
+                      "value": "Star Trek"
+                    },
+                    {
+                      "name": "ASPNETCORE_URLS",
+                      "value": "http://+:20001"
                     }
                   ],
                   "resources": {
