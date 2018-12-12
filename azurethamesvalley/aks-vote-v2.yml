@@ -173,9 +173,9 @@ spec:
               name: vote
           env:
             - name: OPTION_A
-              value: "eggs"
+              value: "Star Wars"
             - name: OPTION_B
-              value: "bacon"
+              value: "Star Trek"
 --- 
 apiVersion: v1
 kind: Service
