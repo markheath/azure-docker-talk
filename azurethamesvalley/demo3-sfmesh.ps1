@@ -25,7 +25,7 @@ az mesh network show -g $resGroup -n "votingNetwork"
 $publicIp = az mesh gateway show -n "ingressGateway" -g $resGroup --query "ipAddress" -o tsv
 
 # let's see if it's working
-Start-Process http://$($publicIp)/ # voting
+Start-Process http://$($publicIp):8080/ # voting
 Start-Process http://$($publicIp):8081/ # results - not working
 
 # view logs for containers

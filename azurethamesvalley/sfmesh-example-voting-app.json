@@ -54,60 +54,6 @@
         "destinationNetwork": {
           "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]"
         },
-        "http": [
-          {
-            "name": "httpVote",
-            "port": 80,
-            "hosts": [
-              {
-                "name": "*",
-                "routes": [
-                  {
-                    "name":  "voteRoute",
-                    "match": {
-                      "path": {
-                        "value": "/",
-                        "rewrite": "/",
-                        "type": "Prefix"
-                      }
-                    },
-                    "destination": {
-                      "applicationName": "votingApp",
-                      "serviceName": "voteService",
-                      "endpointName": "voteListener"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "httpResult",
-            "port": 8082,
-            "hosts": [
-              {
-                "name": "*",
-                "routes": [
-                  {
-                    "name": "resultRoute",
-                    "match": {
-                      "path": {
-                        "value": "/",
-                        "rewrite": "/",
-                        "type": "Prefix"
-                      }
-                    },
-                    "destination": {
-                      "applicationName": "votingApp",
-                      "serviceName": "resultService",
-                      "endpointName": "resultListener"
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ],
         "tcp": [
           {
             "name": "tcpVote",
@@ -246,9 +192,6 @@
                 {
                   "name": "workerCode",
                   "image": "dockersamples/examplevotingapp_worker:dotnet-nanoserver",
-                  "endpoints": [
-
-                  ],
                   "environmentVariables": [
                     {
                       "name": "ConnectionStrings:VoteData",
