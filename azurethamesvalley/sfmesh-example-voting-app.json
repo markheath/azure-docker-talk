@@ -138,6 +138,7 @@
             }
           },
           {
+            "type": "Microsoft.ServiceFabricMesh/services",
             "name": "resultService",
             "properties": {
               "description": "result service.",
@@ -160,6 +161,10 @@
                     {
                       "name": "ASPNETCORE_URLS",
                       "value": "http://+:20002"
+                    },
+                    {
+                      "name": "Logging:LogLevel:Default",
+                      "value": "Debug"
                     }
                   ],
                   "resources": {
@@ -184,6 +189,7 @@
             }
           },
           {
+            "type": "Microsoft.ServiceFabricMesh/services",
             "name": "workerService",
             "properties": {
               "description": "worker service.",
@@ -215,6 +221,7 @@
             }
           },
           {
+            "type": "Microsoft.ServiceFabricMesh/services",
             "name": "message-queue",
             "properties": {
               "description": "message-queue service.",
@@ -254,6 +261,7 @@
             }
           },
           {
+            "type": "Microsoft.ServiceFabricMesh/services",
             "name": "db",
             "properties": {
               "description": "db service.",

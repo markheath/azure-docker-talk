@@ -21,6 +21,13 @@ az mesh app show -g $resGroup -n $appName
 az mesh gateway show -n "ingressGateway" -g $resGroup -o table
 az mesh network show -g $resGroup -n "votingNetwork"
 
+# see summary of services
+az mesh service list -g $resGroup --app-name $appName -o table
+
+# explore the services
+az mesh service show -g $resGroup --app-name $appName -n "resultService"
+az mesh service show -g $resGroup --app-name $appName -n "voteService"
+
 # get public ip address
 $publicIp = az mesh gateway show -n "ingressGateway" -g $resGroup --query "ipAddress" -o tsv
 
@@ -30,14 +37,8 @@ Start-Process http://$($publicIp):8081/ # results - not working
 
 # view logs for containers
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name "voteService" --replica-name 0 --code-package-name "voteCode"
+az mesh code-package-log get -g $resGroup --application-name $appName --service-name "workerService" --replica-name 0 --code-package-name "workerCode"
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name "resultService" --replica-name 0 --code-package-name "resultCode"
-az mesh code-package-log get -g $resGroup --application-name $appName --service-name "workerService" --replica-name 0 --code-package-name "worker"
-
-# see summary of services
-az mesh service list -g $resGroup --app-name $appName -o table
-
-# explore the result service
-az mesh service show -g $resGroup --app-name $appName -n "resultService"
 
 # scale up vote container to 3 instances (currently seems unreliable)
 # https://github.com/Azure/service-fabric-mesh-preview/issues/266
