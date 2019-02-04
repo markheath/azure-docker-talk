@@ -60,7 +60,7 @@
             "port": 8080,
             "destination": {
               "applicationName": "votingApp",
-              "serviceName": "voteService",
+              "serviceName": "vote-service",
               "endpointName": "voteListener"
             }
           },
@@ -69,7 +69,7 @@
             "port": 8081,
             "destination": {
               "applicationName": "votingApp",
-              "serviceName": "resultService",
+              "serviceName": "result-Service",
               "endpointName": "resultListener"
             }
           }
@@ -88,7 +88,7 @@
         "services": [
           {
             "type": "Microsoft.ServiceFabricMesh/services",
-            "name": "voteService",
+            "name": "vote-service",
             "properties": {
               "description": "vote service",
               "osType": "Windows",
@@ -110,6 +110,10 @@
                     {
                       "name": "Voting__OptionB",
                       "value": "Star Trek"
+                    },
+                    {
+                      "name": "MessageQueue__Url",
+                      "value": "nats://message-queue-service:4222"
                     },
                     {
                       "name": "ASPNETCORE_URLS",
@@ -139,7 +143,7 @@
           },
           {
             "type": "Microsoft.ServiceFabricMesh/services",
-            "name": "resultService",
+            "name": "result-service",
             "properties": {
               "description": "result service.",
               "osType": "Windows",
@@ -156,7 +160,7 @@
                   "environmentVariables": [
                     {
                       "name": "ConnectionStrings:ResultData",
-                      "value": "Server=db;Port=4000;Database=votes;User=root;SslMode=None"
+                      "value": "Server=db-service;Port=4000;Database=votes;User=root;SslMode=None"
                     },
                     {
                       "name": "ASPNETCORE_URLS",
@@ -190,7 +194,7 @@
           },
           {
             "type": "Microsoft.ServiceFabricMesh/services",
-            "name": "workerService",
+            "name": "worker-service",
             "properties": {
               "description": "worker service.",
               "osType": "Windows",
@@ -200,8 +204,12 @@
                   "image": "dockersamples/examplevotingapp_worker:dotnet-nanoserver",
                   "environmentVariables": [
                     {
-                      "name": "ConnectionStrings:VoteData",
-                      "value": "Server=db;Port=4000;Database=votes;User=root;SslMode=None"
+                      "name": "ConnectionStrings__VoteData",
+                      "value": "Server=db-service;Port=4000;Database=votes;User=root;SslMode=None"
+                    },
+                    {
+                      "name": "MessageQueue__Url",
+                      "value": "nats://message-queue-service:4222"
                     }
                   ],
                   "resources": {
@@ -222,7 +230,7 @@
           },
           {
             "type": "Microsoft.ServiceFabricMesh/services",
-            "name": "message-queue",
+            "name": "message-queue-service",
             "properties": {
               "description": "message-queue service.",
               "osType": "Windows",
@@ -262,7 +270,7 @@
           },
           {
             "type": "Microsoft.ServiceFabricMesh/services",
-            "name": "db",
+            "name": "db-service",
             "properties": {
               "description": "db service.",
               "osType": "Windows",
