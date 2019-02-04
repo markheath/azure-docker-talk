@@ -12,7 +12,7 @@ $clusterName = "MarkAks"
 az aks create -g $aksrg -n $clusterName --node-count 3 --generate-ssh-keys
 
 # Get credentials for kubectl to use
-az aks get-credentials -g $aksrg -n $clusterName
+az aks get-credentials -g $aksrg -n $clusterName --overwrite-existing
 
 # Check we're connected
 kubectl get nodes
