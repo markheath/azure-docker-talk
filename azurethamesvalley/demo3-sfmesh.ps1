@@ -39,6 +39,7 @@ Start-Process http://$($publicIp):8081/ # results - not working
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name "voteService" --replica-name 0 --code-package-name "voteCode"
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name "workerService" --replica-name 0 --code-package-name "workerCode"
 az mesh code-package-log get -g $resGroup --application-name $appName --service-name "resultService" --replica-name 0 --code-package-name "resultCode"
+az mesh code-package-log get -g $resGroup --application-name $appName --service-name "db" --replica-name 0 --code-package-name "tidbCode"
 
 # scale up vote container to 3 instances (currently seems unreliable)
 # https://github.com/Azure/service-fabric-mesh-preview/issues/266
