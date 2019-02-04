@@ -22,7 +22,50 @@
       "metadata": {
           "description": "The number of service replicas for the worker service."
       }
+    },
+    "registryPassword": {
+      "defaultValue": "",
+      "type": "SecureString",
+      "metadata": {
+        "description": "Password for the private image registry server. For Azure Container Registry the CLI command 'az acr credential show --name <myacr> --query \"passwords[0].value\"' will show the password."
+      }
+    },
+    "registryUserName": {
+        "defaultValue": "",
+        "type": "string",
+        "metadata": {
+            "description": "User name for the private image registry server. For Azure Container Registry the CLI command 'az acr credential show --name <myacr> --query \"username\"' will show the username."
+        }
+    },
+    "registryServer": {
+        "defaultValue": "",
+        "type": "string",
+        "metadata": {
+            "description": "Private image registry server. For example, '<myacr>.azurecr.io'"
+        }
+    },
+    "resultImageName": {
+      "defaultValue": " dockersamples/examplevotingapp_result:dotnet-nanoserver",
+      "type": "string",
+      "metadata": {
+        "description": "Image for the result service"
+      }
+    },
+    "voteImageName": {
+      "defaultValue": " dockersamples/examplevotingapp_vote:dotnet-nanoserver",
+      "type": "string",
+      "metadata": {
+        "description": "Image for the vote service"
+      }
+    },
+    "workerImageName": {
+      "defaultValue": " dockersamples/examplevotingapp_worker:dotnet-nanoserver",
+      "type": "string",
+      "metadata": {
+        "description": "Image for the worker service"
+      }
     }
+
   },
   "resources": [
     {
@@ -95,7 +138,12 @@
               "codePackages": [
                 {
                   "name": "voteCode",
-                  "image": "dockersamples/examplevotingapp_vote:dotnet-nanoserver",
+                  "image": "[parameters('voteImageName')]",
+                  "imageRegistryCredential": {
+                    "server": "[parameters('registryServer')]",
+                    "username": "[parameters('registryUserName')]",
+                    "password": "[parameters('registryPassword')]"
+                  },
                   "endpoints": [
                     {
                       "name": "voteListener",
@@ -150,7 +198,12 @@
               "codePackages": [
                 {
                   "name": "resultCode",
-                  "image": "dockersamples/examplevotingapp_result:dotnet-nanoserver",
+                  "image": "[parameters('resultImageName')]",
+                  "imageRegistryCredential": {
+                    "server": "[parameters('registryServer')]",
+                    "username": "[parameters('registryUserName')]",
+                    "password": "[parameters('registryPassword')]"
+                  },
                   "endpoints": [
                     {
                       "name": "resultListener",
@@ -201,7 +254,12 @@
               "codePackages": [
                 {
                   "name": "workerCode",
-                  "image": "dockersamples/examplevotingapp_worker:dotnet-nanoserver",
+                  "image": "[parameters('workerImageName')]",
+                  "imageRegistryCredential": {
+                    "server": "[parameters('registryServer')]",
+                    "username": "[parameters('registryUserName')]",
+                    "password": "[parameters('registryPassword')]"
+                  },
                   "environmentVariables": [
                     {
                       "name": "ConnectionStrings__VoteData",

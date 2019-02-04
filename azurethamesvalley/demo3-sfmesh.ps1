@@ -11,9 +11,42 @@ az extension update --name mesh
 $resGroup = "AzureThamesValleySFMesh"
 az group create -n $resGroup -l "westeurope"
 
+# create an ACR
+$acrName = "sfmeshxyz"
+az acr create -g $resGroup -n $acrName --sku Basic --admin-enabled
+
+# retrieve ACR credentials
+$acrUsername = az acr credential show --name $acrName --query username -o tsv
+$acrPassword = az acr credential show --name $acrName --query "passwords[0].value" -o tsv
+
+git clone "https://github.com/dockersamples/example-voting-app.git"
+Push-Location "example-voting-app/result/dotnet"
+az acr build -r $acrname -f .\Dockerfile --os Windows -t result:win .
+Pop-Location
+
+Push-Location "example-voting-app/worker/dotnet"
+az acr build -r $acrname -f .\Dockerfile --os Windows -t worker:win .
+Pop-Location
+
+Push-Location "example-voting-app/vote/dotnet"
+az acr build -r $acrname -f .\Dockerfile --os Windows -t vote:win .
+Pop-Location
+
+$paramsFile = ".\params.json"
+$params = @{
+    registryServer = @{ value = "$acrName.azurecr.io"}
+    registryUserName = @{ value = "$acrUsername"}
+    registryPassword = @{ value = "$acrPassword"}
+    voteImageName = @{ value = "$acrName.azurecr.io/vote:win"}
+    resultImageName = @{ value = "$acrName.azurecr.io/result:win"}
+    workerImageName = @{ value = "$acrName.azurecr.io/worker:win"}
+}
+
+$params | ConvertTo-Json | Out-File $paramsFile
+
 # deploy the mesh application
 $templateFile = ".\sfmesh-example-voting-app.json"
-az mesh deployment create -g $resGroup --template-file $templateFile
+az mesh deployment create -g $resGroup --template-file $templateFile --parameters $paramsFile
 
 # get status of application
 $appName = "votingApp"
