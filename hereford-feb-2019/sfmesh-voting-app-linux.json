@@ -1,0 +1,265 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "voteReplicaCount":{
+        "defaultValue": "1",
+        "type": "string",
+        "metadata": {
+            "description": "The number of service replicas for the vote service."
+        }
+      },
+      "resultReplicaCount":{
+        "defaultValue": "1",
+        "type": "string",
+        "metadata": {
+            "description": "The number of service replicas for the result service."
+        }
+      },
+      "workerReplicaCount":{
+        "defaultValue": "1",
+        "type": "string",
+        "metadata": {
+            "description": "The number of service replicas for the worker service."
+        }
+      }
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-09-01-preview",
+            "name": "votingNetwork",
+            "type": "Microsoft.ServiceFabricMesh/networks",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties": {
+              "kind": "Local",
+              "description": "Service Fabric Mesh Network.",
+              "networkAddressPrefix": "10.0.0.0/24"
+            }
+          },
+          {
+            "apiVersion": "2018-09-01-preview",
+            "name": "ingressGateway",
+            "type": "Microsoft.ServiceFabricMesh/gateways",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "dependsOn": [
+              "Microsoft.ServiceFabricMesh/networks/votingNetwork"
+            ],
+            "properties": {
+              "description": "Service Fabric Mesh Gateway.",
+              "sourceNetwork": {
+                "name": "Open"
+              },
+              "destinationNetwork": {
+                "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]"
+              },
+              "tcp": [
+                {
+                  "name": "tcpVote",
+                  "port": 8080,
+                  "destination": {
+                    "applicationName": "votingApp",
+                    "serviceName": "voteService",
+                    "endpointName": "voteListener"
+                  }
+                },
+                {
+                  "name": "tcpResult",
+                  "port": 80,
+                  "destination": {
+                    "applicationName": "votingApp",
+                    "serviceName": "resultService",
+                    "endpointName": "resultListener"
+                  }
+                }
+              ]
+            }
+          },
+      {
+        "apiVersion": "2018-09-01-preview",
+        "name": "votingApp",
+        "type": "Microsoft.ServiceFabricMesh/applications",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "Microsoft.ServiceFabricMesh/networks/votingNetwork"
+        ],
+        "properties": {
+          "services": [
+            {
+              "name": "voteService",
+              "properties": {
+                "description": "vote service",
+                "osType": "Linux",
+                "codePackages": [
+                  {
+                    "name": "voteCode",
+                    "image": "dockersamples/examplevotingapp_vote:before",
+                    "endpoints": [
+                      {
+                        "name": "voteListener",
+                        "port": 80
+                      }
+                    ],
+                    "resources": {
+                      "requests": {
+                        "cpu": "0.5",
+                        "memoryInGB": "1"
+                      }
+                    }
+                  }
+                ],
+                "replicaCount": "[parameters('voteReplicaCount')]",
+                "networkRefs": [
+                  {
+                    "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                    "endpointRefs": [
+                    {
+                        "name": "voteListener"
+                    }]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "resultService",
+              "properties": {
+                "description": "result service.",
+                "osType": "Linux",
+                "codePackages": [
+                  {
+                    "name": "resultCode",
+                    "image": "dockersamples/examplevotingapp_result:before",
+                    "endpoints": [
+                      {
+                        "name": "resultListener",
+                        "port": 80
+                      }
+                    ],
+                    "resources": {
+                      "requests": {
+                        "cpu": "0.5",
+                        "memoryInGB": "1"
+                      }
+                    }
+                  }
+                ],
+                "replicaCount": "[parameters('resultReplicaCount')]",
+                "networkRefs": [
+                  {
+                    "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                    "endpointRefs": [
+                    {
+                        "name": "resultListener"
+                    }]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "worker",
+              "properties": {
+                "description": "worker service.",
+                "osType": "Linux",
+                "codePackages": [
+                  {
+                    "name": "workerCode",
+                    "image": "dockersamples/examplevotingapp_worker:latest",
+                    "resources": {
+                      "requests": {
+                        "cpu": "0.5",
+                        "memoryInGB": "1"
+                      }
+                    }
+                  }
+                ],
+                "replicaCount": "[parameters('workerReplicaCount')]",
+                "networkRefs": [
+                  {
+                    "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "redis",
+              "properties": {
+                "description": "redis queue service.",
+                "osType": "Linux",
+                "codePackages": [
+                  {
+                    "name": "redisCode",
+                    "image": "registry.hub.docker.com/library/redis:alpine",
+                    "endpoints": [
+                      {
+                        "name": "redisListener",
+                        "port": 6379
+                      }
+                    ],
+                    "environmentVariables": [
+  
+                    ],
+                    "resources": {
+                      "requests": {
+                        "cpu": "0.5",
+                        "memoryInGB": "1"
+                      }
+                    }
+                  }
+                ],
+                "replicaCount": "1",
+                "networkRefs": [
+                  {
+                    "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                    "endpointRefs": [
+                    {
+                        "name": "redisListener"
+                    }]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "db",
+              "properties": {
+                "description": "db service.",
+                "osType": "Linux",
+                "codePackages": [
+                  {
+                    "name": "dbCode",
+                    "image": "registry.hub.docker.com/library/postgres:9.4",
+                    "endpoints": [
+                      {
+                        "name": "dbListener",
+                        "port": 5432
+                      }
+                    ],
+                    "environmentVariables": [
+  
+                    ],
+                    "resources": {
+                      "requests": {
+                        "cpu": "0.5",
+                        "memoryInGB": "1"
+                      }
+                    }
+                  }
+                ],
+                "replicaCount": "1",
+                "networkRefs": [
+                  {
+                    "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                    "endpointRefs": [
+                    {
+                        "name": "dbListener"
+                    }]
+                  }
+                ]
+              }
+            }
+          ],
+          "description": "Sample Linux voting app. https://github.com/sixeyed/example-voting-app"
+        }
+      }
+    ]
+  }

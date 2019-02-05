@@ -1,0 +1,380 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "voteReplicaCount":{
+      "defaultValue": "1",
+      "type": "string",
+      "metadata": {
+          "description": "The number of service replicas for the vote service."
+      }
+    },
+    "resultReplicaCount":{
+      "defaultValue": "1",
+      "type": "string",
+      "metadata": {
+          "description": "The number of service replicas for the result service."
+      }
+    },
+    "workerReplicaCount":{
+      "defaultValue": "1",
+      "type": "string",
+      "metadata": {
+          "description": "The number of service replicas for the worker service."
+      }
+    },
+    "registryPassword": {
+      "defaultValue": "",
+      "type": "SecureString",
+      "metadata": {
+        "description": "Password for the private image registry server. For Azure Container Registry the CLI command 'az acr credential show --name <myacr> --query \"passwords[0].value\"' will show the password."
+      }
+    },
+    "registryUserName": {
+        "defaultValue": "",
+        "type": "string",
+        "metadata": {
+            "description": "User name for the private image registry server. For Azure Container Registry the CLI command 'az acr credential show --name <myacr> --query \"username\"' will show the username."
+        }
+    },
+    "registryServer": {
+        "defaultValue": "",
+        "type": "string",
+        "metadata": {
+            "description": "Private image registry server. For example, '<myacr>.azurecr.io'"
+        }
+    },
+    "resultImageName": {
+      "defaultValue": " dockersamples/examplevotingapp_result:dotnet-nanoserver",
+      "type": "string",
+      "metadata": {
+        "description": "Image for the result service"
+      }
+    },
+    "voteImageName": {
+      "defaultValue": " dockersamples/examplevotingapp_vote:dotnet-nanoserver",
+      "type": "string",
+      "metadata": {
+        "description": "Image for the vote service"
+      }
+    },
+    "workerImageName": {
+      "defaultValue": " dockersamples/examplevotingapp_worker:dotnet-nanoserver",
+      "type": "string",
+      "metadata": {
+        "description": "Image for the worker service"
+      }
+    }
+
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-09-01-preview",
+      "name": "votingNetwork",
+      "type": "Microsoft.ServiceFabricMesh/networks",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [],
+      "properties": {
+        "kind": "Local",
+        "description": "Service Fabric Mesh Network.",
+        "networkAddressPrefix": "10.0.0.0/24"
+      }
+    },
+    {
+      "apiVersion": "2018-09-01-preview",
+      "name": "ingressGateway",
+      "type": "Microsoft.ServiceFabricMesh/gateways",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "dependsOn": [
+        "Microsoft.ServiceFabricMesh/networks/votingNetwork"
+      ],
+      "properties": {
+        "description": "Service Fabric Mesh Gateway.",
+        "sourceNetwork": {
+          "name": "Open"
+        },
+        "destinationNetwork": {
+          "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]"
+        },
+        "tcp": [
+          {
+            "name": "tcpVote",
+            "port": 8080,
+            "destination": {
+              "applicationName": "votingApp",
+              "serviceName": "vote-service",
+              "endpointName": "voteListener"
+            }
+          },
+          {
+            "name": "tcpResult",
+            "port": 8081,
+            "destination": {
+              "applicationName": "votingApp",
+              "serviceName": "result-Service",
+              "endpointName": "resultListener"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2018-09-01-preview",
+      "name": "votingApp",
+      "type": "Microsoft.ServiceFabricMesh/applications",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "Microsoft.ServiceFabricMesh/networks/votingNetwork"
+      ],
+      "properties": {
+        "services": [
+          {
+            "type": "Microsoft.ServiceFabricMesh/services",
+            "name": "vote-service",
+            "properties": {
+              "description": "vote service",
+              "osType": "Windows",
+              "codePackages": [
+                {
+                  "name": "voteCode",
+                  "image": "[parameters('voteImageName')]",
+                  "imageRegistryCredential": {
+                    "server": "[parameters('registryServer')]",
+                    "username": "[parameters('registryUserName')]",
+                    "password": "[parameters('registryPassword')]"
+                  },
+                  "endpoints": [
+                    {
+                      "name": "voteListener",
+                      "port": 20001
+                    }
+                  ],
+                  "environmentVariables": [
+                    {
+                      "name": "Voting__OptionA",
+                      "value": "Star Wars"
+                    },
+                    {
+                      "name": "Voting__OptionB",
+                      "value": "Star Trek"
+                    },
+                    {
+                      "name": "MessageQueue__Url",
+                      "value": "nats://message-queue-service:4222"
+                    },
+                    {
+                      "name": "ASPNETCORE_URLS",
+                      "value": "http://+:20001"
+                    }
+                  ],
+                  "resources": {
+                    "requests": {
+                      "cpu": "0.5",
+                      "memoryInGB": "1"
+                    }
+                  }
+                }
+              ],
+              "replicaCount": "[parameters('voteReplicaCount')]",
+              "networkRefs": [
+                {
+                  "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                  "endpointRefs": [
+                    {
+                      "name": "voteListener"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "Microsoft.ServiceFabricMesh/services",
+            "name": "result-service",
+            "properties": {
+              "description": "result service.",
+              "osType": "Windows",
+              "codePackages": [
+                {
+                  "name": "resultCode",
+                  "image": "[parameters('resultImageName')]",
+                  "imageRegistryCredential": {
+                    "server": "[parameters('registryServer')]",
+                    "username": "[parameters('registryUserName')]",
+                    "password": "[parameters('registryPassword')]"
+                  },
+                  "endpoints": [
+                    {
+                      "name": "resultListener",
+                      "port": 20002
+                    }
+                  ],
+                  "environmentVariables": [
+                    {
+                      "name": "ConnectionStrings:ResultData",
+                      "value": "Server=db-service;Port=3306;Database=votes;User=root;SslMode=None"
+                    },
+                    {
+                      "name": "ASPNETCORE_URLS",
+                      "value": "http://+:20002"
+                    },
+                    {
+                      "name": "Logging:LogLevel:Default",
+                      "value": "Debug"
+                    }
+                  ],
+                  "resources": {
+                    "requests": {
+                      "cpu": "0.5",
+                      "memoryInGB": "1"
+                    }
+                  }
+                }
+              ],
+              "replicaCount": "[parameters('resultReplicaCount')]",
+              "networkRefs": [
+                {
+                  "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                  "endpointRefs": [
+                    {
+                      "name": "resultListener"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "Microsoft.ServiceFabricMesh/services",
+            "name": "worker-service",
+            "properties": {
+              "description": "worker service.",
+              "osType": "Windows",
+              "codePackages": [
+                {
+                  "name": "workerCode",
+                  "image": "[parameters('workerImageName')]",
+                  "imageRegistryCredential": {
+                    "server": "[parameters('registryServer')]",
+                    "username": "[parameters('registryUserName')]",
+                    "password": "[parameters('registryPassword')]"
+                  },
+                  "environmentVariables": [
+                    {
+                      "name": "ConnectionStrings__VoteData",
+                      "value": "Server=db-service;Port=3306;Database=votes;User=root;SslMode=None"
+                    },
+                    {
+                      "name": "MessageQueue__Url",
+                      "value": "nats://message-queue-service:4222"
+                    }
+                  ],
+                  "resources": {
+                    "requests": {
+                      "cpu": "0.5",
+                      "memoryInGB": "1"
+                    }
+                  }
+                }
+              ],
+              "replicaCount": "[parameters('workerReplicaCount')]",
+              "networkRefs": [
+                {
+                  "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]"
+                }
+              ]
+            }
+          },
+          {
+            "type": "Microsoft.ServiceFabricMesh/services",
+            "name": "message-queue-service",
+            "properties": {
+              "description": "message-queue service.",
+              "osType": "Windows",
+              "codePackages": [
+                {
+                  "name": "messageQueueCode",
+                  "image": "registry.hub.docker.com/library/nats:nanoserver",
+                  "endpoints": [
+                    {
+                      "name": "messageQueueListener",
+                      "port": 4222
+                    }
+                  ],
+                  "environmentVariables": [
+
+                  ],
+                  "resources": {
+                    "requests": {
+                      "cpu": "0.5",
+                      "memoryInGB": "1"
+                    }
+                  }
+                }
+              ],
+              "replicaCount": "1",
+              "networkRefs": [
+                {
+                  "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                  "endpointRefs": [
+                    {
+                      "name": "messageQueueListener"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "type": "Microsoft.ServiceFabricMesh/services",
+            "name": "db-service",
+            "properties": {
+              "description": "db service.",
+              "osType": "Windows",
+              "codePackages": [
+                {
+                  "name": "tidbCode",
+                  "image": "dockersamples/tidb:nanoserver",
+                  "endpoints": [
+                    {
+                      "name": "dbListener",
+                      "port": 3306
+                    }
+                  ],
+                  "environmentVariables": [
+
+                  ],
+                  "resources": {
+                    "requests": {
+                      "cpu": "0.5",
+                      "memoryInGB": "1"
+                    }
+                  }
+                }
+              ],
+              "replicaCount": "1",
+              "networkRefs": [
+                {
+                  "name": "[resourceId('Microsoft.ServiceFabricMesh/networks', 'votingNetwork')]",
+                  "endpointRefs": [
+                    {
+                      "name": "dbListener"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "description": "Sample voting app. https://github.com/sixeyed/example-voting-app"
+      }
+    }
+  ],
+  "outputs": {
+    "publicIPAddress": {
+      "value": "[reference('ingressGateway').ipAddress]",
+      "type": "string"
+    }
+  }
+}
