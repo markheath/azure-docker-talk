@@ -3,9 +3,9 @@ az account show --query name -o tsv
 az account set -s "MVP"
 
 # 1. Create a resource group
-$aksrg = "SmartDevsHerefordDemo"
+$aksrg = "SmartDevsHerefordAks"
 $location = "westeurope" # see valid regions at https://azure.microsoft.com/en-gb/global-infrastructure/services/?products=kubernetes-service
-az group create -n $aksrg -l $location
+az group create -n $aksrg -l $location --self-destruct 1d
 
 # Create our AKS Cluster (takes about 8 minutes)
 $clusterName = "MarkAks"

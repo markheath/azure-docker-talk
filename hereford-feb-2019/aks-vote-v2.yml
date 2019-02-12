@@ -173,9 +173,9 @@ spec:
               name: vote
           env:
             - name: OPTION_A
-              value: "Star Wars"
+              value: "Leave"
             - name: OPTION_B
-              value: "Star Trek"
+              value: "Remain"
 --- 
 apiVersion: v1
 kind: Service
