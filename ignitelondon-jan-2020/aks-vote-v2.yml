@@ -173,9 +173,9 @@ spec:
               name: vote
           env:
             - name: OPTION_A
-              value: "Leave"
+              value: "Serverless"
             - name: OPTION_B
-              value: "Remain"
+              value: "Containers"
 --- 
 apiVersion: v1
 kind: Service
